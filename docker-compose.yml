@@ -7,6 +7,7 @@ services:
       POSTGRES_USER: adauser
       POSTGRES_PASSWORD: adapass
       POSTGRES_DB: curso_spring
+      # Método de autenticação seguro (md5 exige senha)
       POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: "--auth-host=md5"
     ports:

@@ -3,7 +3,7 @@ package tech.ada.java.curso_spring;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = tech.ada.java.cursospring.CursoSpringApplication.class)
 class CursoSpringApplicationTests {
 
 	@Test
