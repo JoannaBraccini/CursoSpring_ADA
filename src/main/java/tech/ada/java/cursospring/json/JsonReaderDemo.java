@@ -28,7 +28,8 @@ public class JsonReaderDemo {
 
     private static void lerComHttpClient() {
         // Lendo JSON de uma URL usando HttpClient
-        try (HttpClient client = HttpClient.newBuilder().build()) {
+        HttpClient client = HttpClient.newBuilder().build();
+        try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://dummyjson.com/posts/1"))
                     .build(); // Get não é necessário especificar, é o padrão

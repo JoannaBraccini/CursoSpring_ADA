@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -25,8 +26,8 @@ public class ApplicationControllerAdvice extends ResponseEntityExceptionHandler 
     public static final String METHOD_ARGUMENT_NOT_VALID_ERROR_MESSAGE = "Campo inválido: '%s'. Causa: '%s'.";
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex,
+            @NonNull HttpHeaders headers, @NonNull HttpStatusCode status, @NonNull WebRequest request) {
         log.error(ex.getMessage(), ex);
         String errorMessage = getErrorMessages(ex.getBindingResult());
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
@@ -50,11 +51,13 @@ public class ApplicationControllerAdvice extends ResponseEntityExceptionHandler 
         return String.format(METHOD_ARGUMENT_NOT_VALID_ERROR_MESSAGE, error.getObjectName(), error.getDefaultMessage());
     }
 
+    @SuppressWarnings("null")
     @ExceptionHandler(value = NaoEncontradoException.class)
     public ResponseEntity<ErrorResponse> recursoNaoEncontradoExceptionHandler(NaoEncontradoException ex) {
-        final ErrorResponse errorResponse = new ErrorResponse(ex.getClass(), ex.getStatus(), ex.getMessage());
+        HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.NOT_FOUND;
+        final ErrorResponse errorResponse = new ErrorResponse(ex.getClass(), status, ex.getMessage());
         log.debug(ex.getMessage(), ex);
-        return new ResponseEntity<>(errorResponse, ex.getStatus());
+        return new ResponseEntity<>(errorResponse, status);
     }
 
     @ExceptionHandler(Exception.class)
