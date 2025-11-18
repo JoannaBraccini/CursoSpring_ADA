@@ -37,7 +37,7 @@ public class UsuarioRestController {
         return new Usuario(UUID.randomUUID(), "Joanna", "joanna@email.com", LocalDate.now());
     }
 
-    @GetMapping("/")
+    @GetMapping
     public List<Usuario> listarTodos() {
         return this.repository.findAll();
         // Usando o repositório para buscar todos os usuários do banco de dados,
@@ -52,20 +52,25 @@ public class UsuarioRestController {
                         () -> new NaoEncontradoException("Usuário não encontrado."));
     }
 
-    @PostMapping("/")
-    public Usuario criarUsuario(@RequestBody @Valid Usuario usuario) {
+    @PostMapping
+    public Usuario criarUsuario(@RequestBody @Valid UsuarioCreateDTO dto) {
+        Usuario usuario = new Usuario();
+        usuario.setUuid(dto.getUuid() != null ? UUID.fromString(dto.getUuid()) : UUID.randomUUID());
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setDob(LocalDate.parse(dto.getDob()));
         usuario.setId(null); // Garante que o banco vai gerar o id
-        return this.repository.save(usuario); // Salvando o usuário no banco de dados
+        return this.repository.save(usuario);
     }
 
     @PostMapping("/create-dummy")
     public Usuario createDummy() {
-        Usuario dummy = new Usuario(
-                UUID.randomUUID(),
-                "Dummy",
-                "dummy@example.com",
-                LocalDate.now().minusYears(18));
-        return this.criarUsuario(dummy);
+        UsuarioCreateDTO dummyDto = new UsuarioCreateDTO();
+        dummyDto.setUuid(UUID.randomUUID().toString());
+        dummyDto.setNome("Dummy");
+        dummyDto.setEmail("dummy@example.com");
+        dummyDto.setDob(LocalDate.now().minusYears(18).toString());
+        return this.criarUsuario(dummyDto);
     }
 
     @PutMapping("/{uuid}")
