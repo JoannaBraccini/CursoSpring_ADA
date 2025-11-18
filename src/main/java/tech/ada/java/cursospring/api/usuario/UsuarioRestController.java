@@ -1,10 +1,11 @@
 package tech.ada.java.cursospring.api.usuario;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,11 +26,12 @@ import tech.ada.java.cursospring.api.exception.NaoEncontradoException;
 @RequestMapping("/usuarios")
 public class UsuarioRestController {
 
-    private final List<Usuario> usuarioList = new ArrayList<>();
     private final UsuarioJpaRepository repository; // Injeção de dependência, não inicializada aqui, delegada ao Spring
+    private final ModelMapper modelMapper;
 
-    public UsuarioRestController(UsuarioJpaRepository repository) {
+    public UsuarioRestController(UsuarioJpaRepository repository, ModelMapper modelMapper) {
         this.repository = repository;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/dummy")
@@ -38,14 +40,19 @@ public class UsuarioRestController {
     }
 
     @GetMapping
-    public List<Usuario> listarTodos() {
-        return this.repository.findAll();
+    public Page<Usuario> listarTodos(@org.springframework.lang.NonNull Pageable pageable) {
+        return this.repository.findAll(pageable);
         // Usando o repositório para buscar todos os usuários do banco de dados,
         // método herdado de JpaRepository
     }
 
     @GetMapping("/{uuid}")
-    public Usuario buscarPorUuid(@PathVariable UUID uuid) {
+    public UsuarioDTO buscarPorUuidDTO(@PathVariable UUID uuid) {
+        Usuario usuario = buscarPorUuid(uuid);
+        return this.modelMapper.map(usuario, UsuarioDTO.class);
+    }
+
+    private Usuario buscarPorUuid(UUID uuid) {
         // Usando o repositório para buscar o usuário pelo UUID
         return this.repository.findByUuid(uuid)
                 .orElseThrow(
@@ -53,9 +60,9 @@ public class UsuarioRestController {
     }
 
     @PostMapping
-    public Usuario criarUsuario(@RequestBody @Valid UsuarioCreateDTO dto) {
+    public Usuario criarUsuario(@RequestBody @Valid UsuarioDTO dto) {
         Usuario usuario = new Usuario();
-        usuario.setUuid(dto.getUuid() != null ? UUID.fromString(dto.getUuid()) : UUID.randomUUID());
+        usuario.setUuid(dto.getUuid() != null ? dto.getUuid() : UUID.randomUUID());
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         usuario.setDob(LocalDate.parse(dto.getDob()));
@@ -65,8 +72,8 @@ public class UsuarioRestController {
 
     @PostMapping("/create-dummy")
     public Usuario createDummy() {
-        UsuarioCreateDTO dummyDto = new UsuarioCreateDTO();
-        dummyDto.setUuid(UUID.randomUUID().toString());
+        UsuarioDTO dummyDto = new UsuarioDTO();
+        dummyDto.setUuid(UUID.randomUUID());
         dummyDto.setNome("Dummy");
         dummyDto.setEmail("dummy@example.com");
         dummyDto.setDob(LocalDate.now().minusYears(18).toString());
@@ -81,12 +88,11 @@ public class UsuarioRestController {
                                                   // upsert
     }
 
+    @Transactional
     @PatchMapping("/{uuid}/alterar-nome")
     public Usuario alterarNome(@PathVariable UUID uuid, @RequestBody Usuario usuarioAlterado) {
-        Usuario usuario = this.buscarPorUuid(uuid);
-        usuario.setNome(usuarioAlterado.getNome());
-        this.usuarioList.set(this.usuarioList.indexOf(usuario), usuarioAlterado);
-        return usuarioAlterado;
+        this.repository.updateNome(uuid, usuarioAlterado.getNome());
+        return this.buscarPorUuid(uuid);
     }
 
     @Transactional // garante que a operação de delete seja executada em uma transação ACID

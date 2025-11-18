@@ -99,8 +99,9 @@ O arquivo `data.sql` contém INSERTs usados para popular o banco em ambiente de 
 - Se estiver enfrentando problemas estranhos de banco, dados antigos ou erros de build, tente limpar o cache do Docker (volumes e imagens) e recompilar tudo:
 
   ```bash
-  docker-compose down -v
-  docker-compose up -d --build --no-cache
+  docker compose down -v
+  docker compose build --no-cache
+  docker compose up -d
   ```
 
   Isso remove dados antigos e garante que o ambiente está limpo e atualizado.
