@@ -37,10 +37,11 @@ public class UsuarioRestController {
         return new Usuario(UUID.randomUUID(), "Joanna", "joanna@email.com", LocalDate.now());
     }
 
-    @GetMapping
+    @GetMapping("/")
     public List<Usuario> listarTodos() {
-        return this.repository.findAll(); // Usando o repositório para buscar todos os usuários do banco de dados,
-                                          // método herdado de JpaRepository
+        return this.repository.findAll();
+        // Usando o repositório para buscar todos os usuários do banco de dados,
+        // método herdado de JpaRepository
     }
 
     @GetMapping("/{uuid}")
@@ -51,15 +52,19 @@ public class UsuarioRestController {
                         () -> new NaoEncontradoException("Usuário não encontrado."));
     }
 
-    @SuppressWarnings("null")
     @PostMapping("/")
     public Usuario criarUsuario(@RequestBody @Valid Usuario usuario) {
+        usuario.setId(null); // Garante que o banco vai gerar o id
         return this.repository.save(usuario); // Salvando o usuário no banco de dados
     }
 
     @PostMapping("/create-dummy")
     public Usuario createDummy() {
-        Usuario dummy = new Usuario(UUID.randomUUID(), "Dummy", "dummy@example.com", LocalDate.now());
+        Usuario dummy = new Usuario(
+                UUID.randomUUID(),
+                "Dummy",
+                "dummy@example.com",
+                LocalDate.now().minusYears(18));
         return this.criarUsuario(dummy);
     }
 

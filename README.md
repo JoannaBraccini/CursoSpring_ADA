@@ -1,6 +1,6 @@
 # CursoSpring — Elas + Tech
 
-**Projeto de exemplo usado na super aula da Ada/Artemísia** com apoio da Caixa (programa **Elas + Tech**). Este repositório contém uma pequena API Spring Boot de exemplo (CRUD de usuários), com banco PostgreSQL e uma interface de administração (Adminer).
+**Projeto usado nas aulas de Spring Boot da Ada/Artemísia** com apoio da Caixa (programa **Elas + Tech**). Este repositório contém uma pequena API Spring Boot de exemplo (CRUD de usuários), com banco PostgreSQL e uma interface de administração (Adminer).
 
 **Visão Geral**
 
@@ -26,6 +26,14 @@
 cd /localDoProjeto/CursoSpring
 docker compose up -d --build
 ```
+
+Ou, para automatizar todo o processo (compilar, limpar volumes e subir containers), use o script:
+
+```bash
+bash build-e-deploy.sh
+```
+
+Esse script já define o JAVA_HOME para o JDK 21, compila o projeto, remove volumes antigos e sobe os containers prontos para uso.
 
 3. Verifique os containers e portas:
 
@@ -72,29 +80,49 @@ Ou para desenvolvimento (hot reload limitado):
 
 **Sobre a seed e idempotência**
 
-O arquivo `data.sql` contém INSERTs usados para popular o banco em ambiente de desenvolvimento. Se você reiniciar a aplicação sem limpar as tabelas, pode ocorrer erro de conflito de chave única (UUID). Opções:
+O arquivo `data.sql` contém INSERTs usados para popular o banco em ambiente de desenvolvimento.
 
-- Para desenvolvimento rápido, truncar tabelas:
-
-```bash
-docker exec -it postgres_container psql -U adauser -d curso_spring -c "TRUNCATE TABLE postagens, usuarios RESTART IDENTITY CASCADE;"
-```
-
-- Alternativamente, tornar os INSERTs idempotentes usando `ON CONFLICT DO NOTHING` no `data.sql`.
+- O script faz o build das tabelas.
+- Os INSERTs são idempotentes, usando `ON CONFLICT DO NOTHING` no `data.sql`.
 
 **Testes / Postman**
 
 - Ex.: `GET http://localhost:8080/usuarios`
 
-**Dicas de troubleshooting**
+**Dicas de troubleshooting que foram úteis pra mim**
 
 - Se `docker` retornar erro de conexão no Windows, abra o Docker Desktop e aguarde até ele indicar que o daemon está rodando.
 - Se você estiver rodando a app localmente e via Docker ao mesmo tempo, lembre-se que existem duas instâncias (pare a que não quer usar).
 
+- Se estiver enfrentando problemas estranhos de banco, dados antigos ou erros de build, tente limpar o cache do Docker (volumes e imagens) e recompilar tudo:
+
+  ```bash
+  docker-compose down -v
+  docker-compose up -d --build --no-cache
+  ```
+
+  Isso remove dados antigos e garante que o ambiente está limpo e atualizado.
+
+- Se o Maven estiver apresentando erros de build ou dependências, limpe o cache local do projeto (diretório `target`) antes de compilar:
+
+  ```bash
+  mvn clean
+  ```
+
+  Isso remove arquivos antigos de build e resolve muitos problemas de compilação.
+
 **Créditos**
 
-Este projeto foi preparado para a super aula da **Ada/Artemísia**, com apoio da **Caixa** — programa **Elas + Tech**. Obrigada por participar — é um espaço criado por e para mulheres aprendendo tecnologia. <3
+Este projeto foi parte das aulas dadas pela **Ada/Artemísia**, com apoio da **Caixa** no programa **Elas + Tech**. Um projeto criado para mulheres em STEM. <3
 
 ---
 
-Se quiser que eu adicione um `Makefile`, um `docker-compose.override.yml` para dev, ou gere o Postman collection, me avisa que eu implemento.
+## Documentação e Testes da API
+
+Para testar os endpoints da API, acesse o Swagger UI:
+
+http://localhost:8080/docs
+
+Lá você pode visualizar e testar todos os endpoints disponíveis do projeto, inclusive realizar requisições diretamente pela interface web.
+
+---

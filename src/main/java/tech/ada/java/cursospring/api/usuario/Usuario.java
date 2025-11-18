@@ -26,7 +26,7 @@ import lombok.ToString;
 public class Usuario {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id; // chave primária do banco de dados, não exposta na API
 
     private UUID uuid;
