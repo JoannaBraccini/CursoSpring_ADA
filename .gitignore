@@ -33,3 +33,8 @@ build/
 .vscode/
 
 .fake
+
+# Logs da aplicação
+logs/
+*.log
+*.log.*.gz

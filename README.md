@@ -33,6 +33,8 @@ Ou, para automatizar todo o processo (compilar, limpar volumes e subir container
 bash build-e-deploy.sh
 ```
 
+> **ATENÇÃO:** Antes de rodar o script `build-e-deploy.sh`, leia os comentários no início do arquivo! Ele configura o JAVA_HOME para o JDK 21 manualmente, o que é necessário caso seu ambiente não esteja apontando para essa versão. Se você já tem o JAVA_HOME correto ou usa uma IDE como o IntelliJ, pode adaptar ou remover essa configuração.
+
 Esse script já define o JAVA_HOME para o JDK 21, compila o projeto, remove volumes antigos e sobe os containers prontos para uso.
 
 3. Verifique os containers e portas:
