@@ -91,67 +91,6 @@ O arquivo `data.sql` contém INSERTs usados para popular o banco em ambiente de 
 
 - Ex.: `GET http://localhost:8080/usuarios`
 
-**Executando testes automatizados**
-
-Existe um script conveniente na raiz `run-tests.sh` que garante o uso do JDK 21 (compatível com o projeto) e executa os testes via Maven Wrapper.
-
-- Executar todos os testes:
-
-```bash
-bash run-tests.sh
-```
-
-- Executar apenas uma classe de teste (ex.: `AmizadeServiceTest`):
-
-```bash
-bash run-tests.sh tech.ada.java.cursospring.api.amizade.AmizadeServiceTest
-```
-
-O script força por padrão `JAVA_HOME` para o JDK 21 que este projeto espera. Se você quiser usar o Java do sistema (não recomendado aqui), execute com a variável de ambiente `USE_SYSTEM_JAVA=true`:
-
-```bash
-USE_SYSTEM_JAVA=true bash run-tests.sh
-```
-
-### Executando testes automatizados com ou sem cobertura
-
-O script `run-tests.sh` permite executar os testes automatizados com ou sem cobertura de código. Por padrão, os testes são executados **sem cobertura**. Para ativar a cobertura de código, utilize a variável de ambiente `COVERAGE=true`.
-
-- **Executar testes sem cobertura (padrão):**
-
-```bash
-bash run-tests.sh
-```
-
-- **Executar testes com cobertura:**
-
-```bash
-COVERAGE=true bash run-tests.sh
-```
-
-Ao ativar a cobertura, um relatório será gerado no diretório `target/site/jacoco/index.html`. Para visualizar o relatório, abra o arquivo HTML no navegador ou use uma extensão como "Live Server" no VS Code.
-
-**VS Code (diferenças em relação ao IntelliJ)**
-
-- **Resumo:** O IntelliJ possui um runner de cobertura integrado que facilita ver coverage localmente. No VS Code eu acrescentei o plugin JaCoCo ao `pom.xml` e um script `run-tests.sh` para garantir execução consistente com Java 21 e gerar um relatório HTML. Essas alterações facilitam gerar coverage fora do IntelliJ.
-- **Passos principais que fiz aqui (VS Code):**
-  - Atualizei/adicionei `org.jacoco:jacoco-maven-plugin` (versão compatível com Java 21).
-  - Criei/uso o script `run-tests.sh` que força `JAVA_HOME` para JDK 21 e executa `./mvnw test` + gera o relatório JaCoCo.
-  - Abra manualmente o relatório HTML em `target/site/jacoco/index.html` (no VS Code use a extensão "Live Server" ou "Open in Browser").
-- **Comandos úteis (VS Code):**
-
-```bash
-# rodar todos os testes + gerar relatório JaCoCo
-bash run-tests.sh
-
-# alternativa direta via maven
-./mvnw clean test jacoco:report
-```
-
-- **Observações:**
-  - JaCoCo precisa de versão compatível com Java 21 (usei 0.8.11). Se você abrir o projeto no IntelliJ, o runner de coverage do IntelliJ dispensa essa configuração local, mas manter JaCoCo é útil para CI e para quem usa VS Code.
-  - Pode aparecer o aviso do Mockito sobre "inline-mock-maker" — investiguei e preferi não adicionar `mockito-inline` automaticamente porque em alguns ambientes a dependência não foi resolvida; se quiser, posso documentar a alternativa de usar `mockito-inline` ou configurar o agente para CI.
-
 **Dicas de troubleshooting que foram úteis pra mim**
 
 - Se `docker` retornar erro de conexão no Windows, abra o Docker Desktop e aguarde até ele indicar que o daemon está rodando.
@@ -189,4 +128,20 @@ http://localhost:8080/docs
 
 Lá você pode visualizar e testar todos os endpoints disponíveis do projeto, inclusive realizar requisições diretamente pela interface web.
 
----
+### Executando testes automatizados com ou sem cobertura
+
+O script `run-tests.sh` permite executar os testes automatizados com ou sem cobertura de código. Por padrão, os testes são executados **sem cobertura**. Para ativar a cobertura de código, utilize a variável de ambiente `COVERAGE=true`.
+
+- **Executar testes sem cobertura (padrão):**
+
+```bash
+bash run-tests.sh
+```
+
+- **Executar testes com cobertura:**
+
+```bash
+COVERAGE=true bash run-tests.sh
+```
+
+Ao ativar a cobertura, um relatório será gerado no diretório `target/site/jacoco/index.html`. Para visualizar o relatório, abra o arquivo HTML no navegador ou use uma extensão como "Live Server" no VS Code.

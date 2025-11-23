@@ -2,11 +2,11 @@ package tech.ada.java.cursospring.api.amizade;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.EqualsAndHashCode;
 import tech.ada.java.cursospring.api.usuario.UsuarioDTO;
 
 @Getter

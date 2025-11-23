@@ -29,17 +29,12 @@ public class UsuarioRestController {
     private final UsuarioService service;
 
     @GetMapping("/dummy")
-    public UsuarioDTO dummyUsuario() {
-        UsuarioDTO dto = new UsuarioDTO();
-        dto.setUuid(UUID.randomUUID());
-        dto.setNome("Joanna");
-        dto.setEmail("joanna@email.com");
-        dto.setDob(LocalDate.now().toString());
-        return dto;
+    public Usuario dummyUsuario() {
+        return new Usuario(UUID.randomUUID(), "Joanna", "joanna@email.com", LocalDate.now());
     }
 
     @PostMapping("/create-dummy")
-    public UsuarioDTO createDummy() {
+    public Usuario createDummy() {
         UsuarioDTO dummyDto = new UsuarioDTO();
         dummyDto.setUuid(UUID.randomUUID());
         dummyDto.setNome("Dummy");
@@ -64,17 +59,17 @@ public class UsuarioRestController {
     // }
 
     @PostMapping
-    public UsuarioDTO criarUsuario(@RequestBody @Valid UsuarioDTO usuario) {
+    public Usuario criarUsuario(@RequestBody @Valid UsuarioDTO usuario) {
         return this.service.criarUsuario(usuario);
     }
 
     @PutMapping("/{uuid}")
-    public UsuarioDTO atualizarUsuario(@PathVariable UUID uuid, @RequestBody @Valid UsuarioDTO usuario) {
+    public Usuario atualizarUsuario(@PathVariable UUID uuid, @RequestBody @Valid Usuario usuario) {
         return this.service.atualizarUsuario(uuid, usuario);
     }
 
     @PatchMapping("/{uuid}/alterar-nome")
-    public UsuarioDTO alterarNome(@PathVariable UUID uuid, @RequestBody UsuarioDTO usuario) {
+    public Usuario alterarNome(@PathVariable UUID uuid, @RequestBody Usuario usuario) {
         return this.service.alterarNome(uuid, usuario);
     }
 
