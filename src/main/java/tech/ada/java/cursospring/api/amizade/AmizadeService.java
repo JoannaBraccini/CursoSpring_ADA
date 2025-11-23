@@ -1,6 +1,8 @@
 package tech.ada.java.cursospring.api.amizade;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,11 +33,9 @@ public class AmizadeService {
     @Transactional(readOnly = true)
     public Page<AmizadeDTO> listarTodos(@NonNull Pageable pageable) {
         Page<Amizade> usuarios = this.repository.findAll(pageable);
-        List<AmizadeDTO> amizadeDTOList = Objects.requireNonNull(
-                usuarios.getContent().stream()
-                        .map(this::convertToDto)
-                        .collect(Collectors.toList()));
-        return new PageImpl<>(amizadeDTOList, pageable, usuarios.getTotalElements());
+        List<Amizade> content = Optional.ofNullable(usuarios.getContent()).orElseGet(Collections::emptyList);
+        List<AmizadeDTO> amizadeDTOList = content.stream().map(this::convertToDto).collect(Collectors.toList());
+        return new PageImpl<>(Objects.requireNonNull(amizadeDTOList), pageable, usuarios.getTotalElements());
     }
 
     public AmizadeDTO convertToDto(Amizade amizade) {
@@ -49,6 +49,13 @@ public class AmizadeService {
         }
         Usuario usuarioEntityA = this.usuarioService.buscarPorUuid(usuarioA);
         Usuario usuarioEntityB = this.usuarioService.buscarPorUuid(usuarioB);
+
+        // Evita duplicidade (A,B) e (B,A)
+        boolean existeAB = this.repository.existsByUsuarioAAndUsuarioB(usuarioEntityA, usuarioEntityB);
+        boolean existeBA = this.repository.existsByUsuarioAAndUsuarioB(usuarioEntityB, usuarioEntityA);
+        if (existeAB || existeBA) {
+            throw new AmizadeInvalidaBusinessException("Amizade já existe entre esses usuários");
+        }
 
         Amizade amizade = this.repository.save(new Amizade(usuarioEntityA, usuarioEntityB));
         return this.convertToDto(amizade);

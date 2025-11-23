@@ -2,6 +2,8 @@ package tech.ada.java.cursospring.api.usuario;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,16 +31,25 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public Page<UsuarioDTO> listarTodos(@NonNull Pageable pageable) {
         Page<Usuario> usuarios = this.repository.findAll(pageable);
-        List<UsuarioDTO> dtoList = Objects.requireNonNull(usuarios.getContent().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList()));
-        return new PageImpl<>(dtoList, pageable, usuarios.getTotalElements());
+        List<Usuario> content = Optional.ofNullable(usuarios.getContent()).orElseGet(Collections::emptyList);
+        List<UsuarioDTO> dtoList = content.stream().map(this::convertToDto).collect(Collectors.toList());
+        return new PageImpl<>(Objects.requireNonNull(dtoList), pageable, usuarios.getTotalElements());
     }
 
     @Transactional(readOnly = true)
     public UsuarioDTO buscarPorUuidDTO(UUID uuid) {
         Usuario usuario = buscarPorUuid(uuid);
         return usuario != null ? convertToDto(usuario) : null;
+    }
+
+    /**
+     * Expondo um método público para outras services resolverem a entidade por
+     * UUID.
+     * Mantém compatibilidade com chamadas internas que precisem da entidade.
+     */
+    @Transactional(readOnly = true)
+    public Usuario buscarEntidadePorUuid(UUID uuid) {
+        return this.buscarPorUuid(uuid);
     }
 
     @Transactional(readOnly = true)
@@ -54,28 +65,38 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario criarUsuario(UsuarioDTO dto) {
+    public UsuarioDTO criarUsuario(UsuarioDTO dto) {
         Usuario usuario = new Usuario();
         usuario.setUuid(dto.getUuid() != null ? dto.getUuid() : UUID.randomUUID());
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         usuario.setDob(LocalDate.parse(dto.getDob()));
         usuario.setId(null); // Garante que o banco vai gerar o id
-        return this.repository.save(usuario);
+        Usuario salvo = this.repository.save(usuario);
+        return convertToDto(salvo);
     }
 
     @Transactional
-    public Usuario atualizarUsuario(UUID uuid, Usuario usuarioNovo) {
+    public UsuarioDTO atualizarUsuario(UUID uuid, UsuarioDTO usuarioDto) {
         Usuario usuario = this.buscarPorUuid(uuid);
-        usuarioNovo.setId(usuario.getId());
-        // Atualizando o usuário no banco de dados com upsert
-        return this.repository.save(usuarioNovo);
+        // Atualiza apenas os campos que fazem sentido a partir do DTO
+        usuario.setNome(usuarioDto.getNome() != null ? usuarioDto.getNome() : usuario.getNome());
+        usuario.setEmail(usuarioDto.getEmail() != null ? usuarioDto.getEmail() : usuario.getEmail());
+        if (usuarioDto.getDob() != null) {
+            usuario.setDob(LocalDate.parse(usuarioDto.getDob()));
+        }
+        Usuario salvo = this.repository.save(usuario);
+        return convertToDto(salvo);
     }
 
     @Transactional
-    public Usuario alterarNome(UUID uuid, Usuario usuarioAlterado) {
-        this.repository.updateNome(uuid, usuarioAlterado.getNome());
-        return this.buscarPorUuid(uuid);
+    public UsuarioDTO alterarNome(UUID uuid, UsuarioDTO usuarioDto) {
+        if (usuarioDto.getNome() == null) {
+            throw new IllegalArgumentException("Nome é obrigatório para alterar-nome");
+        }
+        this.repository.updateNome(uuid, usuarioDto.getNome());
+        Usuario atualizado = this.buscarPorUuid(uuid);
+        return convertToDto(atualizado);
     }
 
     @Transactional
