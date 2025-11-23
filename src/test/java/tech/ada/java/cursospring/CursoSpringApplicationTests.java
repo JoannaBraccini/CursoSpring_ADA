@@ -1,4 +1,4 @@
-package tech.ada.java.curso_spring;
+package tech.ada.java.cursospring;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
