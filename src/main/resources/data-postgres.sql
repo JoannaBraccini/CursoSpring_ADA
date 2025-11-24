@@ -33,3 +33,20 @@ INSERT INTO postagens (uuid, titulo, corpo, data_criacao, usuario_id) VALUES
 ('650e8400-e29b-41d4-a717-446655440019', 'Empreendedorismo', 'Dicas para começar seu negócio', '2024-03-15', 10),
 ('650e8400-e29b-41d4-a717-446655440020', 'Planejamento financeiro', 'Organizando suas finanças pessoais', '2024-02-10', 10)
 ON CONFLICT (uuid) DO NOTHING;
+
+-- amizades (usuario_a, usuario_b) referenciam ids de 'usuarios' inseridos acima
+-- Use INSERT ... SELECT ... WHERE NOT EXISTS to avoid duplicate rows in Postgres
+-- Inserir amizades buscando os ids pelos UUIDs para garantir integridade referencial
+INSERT INTO amizade (usuario_a, usuario_b)
+SELECT ua.id, ub.id FROM usuarios ua, usuarios ub
+WHERE ua.uuid = '550e8400-e29b-41d4-a716-446655440001' AND ub.uuid = '550e8400-e29b-41d4-a716-446655440002'
+AND NOT EXISTS (
+	SELECT 1 FROM amizade a WHERE a.usuario_a = ua.id AND a.usuario_b = ub.id
+);
+
+INSERT INTO amizade (usuario_a, usuario_b)
+SELECT ua.id, ub.id FROM usuarios ua, usuarios ub
+WHERE ua.uuid = '550e8400-e29b-41d4-a716-446655440001' AND ub.uuid = '550e8400-e29b-41d4-a716-446655440003'
+AND NOT EXISTS (
+	SELECT 1 FROM amizade a WHERE a.usuario_a = ua.id AND a.usuario_b = ub.id
+);
