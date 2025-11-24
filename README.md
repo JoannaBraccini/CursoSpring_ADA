@@ -1,3 +1,31 @@
+**Ajuda Rápida**
+
+- **Build (reprodutível):** use o wrapper do Maven em vez do `mvn` global: `./mvnw`.
+- **JAVA_HOME:** aponte `JAVA_HOME` para um JDK 21 (ex.: `C:\Program Files\Java\jdk-21...`). O `./mvnw` respeita `JAVA_HOME`.
+- **Compilar sem testes (rápido):** `./mvnw -DskipTests clean package`.
+- **Executar testes unitários:** `./mvnw test` (usa H2 em memória).
+- **Executar testes de integração:** `./mvnw -Pintegration-test verify` — requer o Postgres disponível (por Testcontainers ou `docker compose up -d`).
+- **Docker Compose (execução rápida):**
+
+  ```bash
+  docker compose up -d --build
+  docker compose ps
+  docker compose down -v
+  ```
+
+- **Seeds / SQL:** usam-se arquivos por plataforma: `src/main/resources/data-h2.sql` (H2, testes unitários) e `src/main/resources/data-postgres.sql` (Postgres, integração). O DDL principal está em `src/main/resources/schema.sql`.
+- **Scripts legacy:** a pasta `scripts/` contém conveniências antigas e pode ser removida se não for necessária.
+- **Problemas comuns:**
+  - Se o Docker não estiver rodando, abra o Docker Desktop antes de executar os testes de integração.
+  - Para limpar dados antigos, rode: `docker compose down -v` e reconstrua com `docker compose build --no-cache`.
+  - Se o Maven apresentar erros, limpe `target/` e recompile: `./mvnw -DskipTests clean package`.
+- **Referências rápidas:**
+  - `https://maven.apache.org/guides/index.html`
+  - `https://docs.spring.io/spring-boot/3.5.7/maven-plugin`
+  - `https://spring.io/guides/gs/rest-service/`
+
+_Se preferir, eu posso remover o arquivo `HELP.md` após a consolidação._
+
 # CursoSpring — Elas + Tech
 
 **Projeto usado nas aulas de Spring Boot da Ada/Artemísia** com apoio da Caixa (programa **Elas + Tech**). Este repositório contém uma pequena API Spring Boot de exemplo (CRUD de usuários), com banco PostgreSQL e uma interface de administração (Adminer).
@@ -27,16 +55,6 @@ cd /localDoProjeto/CursoSpring
 docker compose up -d --build
 ```
 
-Ou, para automatizar todo o processo (compilar, limpar volumes e subir containers), use o script:
-
-```bash
-bash build-e-deploy.sh
-```
-
-> **ATENÇÃO:** Antes de rodar o script `build-e-deploy.sh`, leia os comentários no início do arquivo! Ele configura o JAVA_HOME para o JDK 21 manualmente, o que é necessário caso seu ambiente não esteja apontando para essa versão. Se você já tem o JAVA_HOME correto ou usa uma IDE como o IntelliJ, pode adaptar ou remover essa configuração.
-
-Esse script já define o JAVA_HOME para o JDK 21, compila o projeto, remove volumes antigos e sobe os containers prontos para uso.
-
 3. Verifique os containers e portas:
 
 ```bash
@@ -53,7 +71,7 @@ Se você alterou o mapeamento de portas, verifique `docker-compose.yml` para os 
 
 **Como rodar localmente (sem Docker)**
 
-1. Tenha JDK 21 instalado e configurado (`JAVA_HOME`).
+1. Tenha JDK 21 instalado e configurado (`JAVA_HOME` apontando para o JDK 21).
 2. Build e run via Maven:
 
 ```bash
@@ -82,10 +100,7 @@ Ou para desenvolvimento (hot reload limitado):
 
 **Sobre a seed e idempotência**
 
-O arquivo `data.sql` contém INSERTs usados para popular o banco em ambiente de desenvolvimento.
-
-- O script faz o build das tabelas.
-- Os INSERTs são idempotentes, usando `ON CONFLICT DO NOTHING` no `data.sql`.
+O projeto usa arquivos de seed separados por plataforma (`data-h2.sql` para testes em memória e `data-postgres.sql` para Postgres). Para execução local com Docker Compose o `data-postgres.sql` é o utilizado.
 
 **Testes / Postman**
 
@@ -116,7 +131,7 @@ O arquivo `data.sql` contém INSERTs usados para popular o banco em ambiente de 
 
 **Créditos**
 
-Este projeto foi parte das aulas dadas pela **Ada/Artemísia**, com apoio da **Caixa** no programa **Elas + Tech**. Um projeto criado para mulheres em STEM. <3
+Este projeto foi parte das aulas dadas pela **Ada/Artemísia**, com apoio da **Caixa** no programa **Elas + Tech**. Um projeto criado para mulheres em STEM. ❤️
 
 ---
 
@@ -128,45 +143,24 @@ http://localhost:8080/docs
 
 Lá você pode visualizar e testar todos os endpoints disponíveis do projeto, inclusive realizar requisições diretamente pela interface web.
 
-### Executando testes automatizados com ou sem cobertura
+### Executando testes automatizados
 
-O runner `test-runner.sh` permite executar os testes automatizados com ou sem cobertura de código. Por padrão, os testes são executados **sem cobertura**. Para ativar a cobertura de código, utilize a variável de ambiente `COVERAGE=true`.
+Use o wrapper do Maven para executar os testes; não é necessário usar scripts adicionais:
 
-- **Executar testes sem cobertura (padrão):**
-
-```bash
-bash scripts/tests/test-runner.sh
-```
-
-- **Executar testes com cobertura:**
+- Testes unitários (H2):
 
 ```bash
-COVERAGE=true bash scripts/tests/test-runner.sh
+./mvnw test
 ```
 
-Ao ativar a cobertura, um relatório será gerado no diretório `target/site/jacoco/index.html`. Para visualizar o relatório, abra o arquivo HTML no navegador ou use uma extensão como "Live Server" no VS Code.
+- Testes de integração (Postgres/Testcontainers):
 
-### Perfis de Teste
+```bash
+./mvnw -Pintegration-test verify
+```
 
-Por padrão, os testes de unidade do projeto usam H2 (banco em memória). Para facilitar o fluxo existem dois wrappers principais:
+Se precisar de relatório de cobertura, ative o profile `coverage`:
 
-- `scripts/tests/run-unit-tests.sh`: roda os testes unitários com o profile `h2` (rápido, isolado).
-- `scripts/tests/run-integration-tests.sh`: roda os testes de integração via Maven (profile `integration-test`) — usa Failsafe e, por padrão, Testcontainers irá inicializar um Postgres ephemeral.
-
-O runner principal `test-runner.sh` ainda existe como utilitário, mas os wrappers acima cobrem os usos mais comuns. Exemplos:
-
-- Executar testes unitários (H2) — recomendado para desenvolvimento local rápido:
-
-  ```bash
-  bash scripts/tests/run-unit-tests.sh
-  # executar um teste específico
-  bash scripts/tests/run-unit-tests.sh tech.ada.java.cursospring.api.amizade.AmizadeServiceTest
-  ```
-
-- Executar testes de integração (requires Docker):
-
-  ```bash
-  bash scripts/tests/run-integration-tests.sh
-  # ou diretamente com Maven
-  ./mvnw -Pintegration-test verify
-  ```
+```bash
+./mvnw -Pcoverage test
+```

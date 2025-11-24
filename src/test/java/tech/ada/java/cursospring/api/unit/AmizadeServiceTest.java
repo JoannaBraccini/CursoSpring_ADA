@@ -1,4 +1,4 @@
-package tech.ada.java.cursospring.api.amizade;
+package tech.ada.java.cursospring.api.unit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -20,11 +20,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import tech.ada.java.cursospring.api.amizade.Amizade;
+import tech.ada.java.cursospring.api.amizade.AmizadeDTO;
+import tech.ada.java.cursospring.api.amizade.AmizadeRepository;
+import tech.ada.java.cursospring.api.amizade.AmizadeService;
 import tech.ada.java.cursospring.api.exception.AmizadeInvalidaBusinessException;
 import tech.ada.java.cursospring.api.usuario.Usuario;
 import tech.ada.java.cursospring.api.usuario.UsuarioService;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 class AmizadeServiceTest {
 
     @Mock
@@ -56,9 +61,10 @@ class AmizadeServiceTest {
         UUID usuarioA = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         UUID usuarioB = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
 
-        Mockito.when(this.usuarioService.buscarPorUuid(Mockito.any())).thenReturn(new Usuario());
-        Mockito.when(this.amizadeRepository.save(Mockito.any())).thenReturn(new Amizade());
-        Mockito.when(this.modelMapper.map(Mockito.any(), Mockito.any())).thenReturn(new AmizadeDTO());
+        Mockito.when(this.usuarioService.buscarPorUuid(Mockito.<UUID>any())).thenReturn(new Usuario());
+        Mockito.when(this.amizadeRepository.save(Mockito.<Amizade>any())).thenReturn(new Amizade());
+        Mockito.when(this.modelMapper.map(Mockito.<Amizade>any(), eq(AmizadeDTO.class)))
+                .thenReturn(new AmizadeDTO());
 
         // ação
         AmizadeDTO amizadeDTO = this.amizadeService.criarAmizade(usuarioA, usuarioB);
@@ -75,16 +81,16 @@ class AmizadeServiceTest {
         Amizade amizade = new Amizade(usuarioA, usuarioB);
         List<Amizade> amizades = Arrays.asList(amizade);
         Page<Amizade> page = new PageImpl<>(amizades);
-        when(amizadeRepository.findAll(any(Pageable.class))).thenReturn(page);
-        when(modelMapper.map(any(Amizade.class), eq(AmizadeDTO.class))).thenReturn(new AmizadeDTO());
+        when(amizadeRepository.findAll(Mockito.<Pageable>any())).thenReturn(page);
+        when(modelMapper.map(Mockito.<Amizade>any(), eq(AmizadeDTO.class))).thenReturn(new AmizadeDTO());
 
         Page<AmizadeDTO> result = amizadeService.listarTodos(PageRequest.of(0, 10));
 
         assertEquals(1, result.getTotalElements());
         assertNotNull(result.getContent().get(0));
 
-        verify(amizadeRepository).findAll(any(Pageable.class));
-        verify(modelMapper, times(1)).map(any(Amizade.class), eq(AmizadeDTO.class));
+        verify(amizadeRepository).findAll(Mockito.<Pageable>any());
+        verify(modelMapper, times(1)).map(Mockito.<Amizade>any(), eq(AmizadeDTO.class));
     }
 
     @Test
@@ -92,7 +98,7 @@ class AmizadeServiceTest {
         Usuario usuarioA = new Usuario();
         Usuario usuarioB = new Usuario();
         Amizade amizade = new Amizade(usuarioA, usuarioB);
-        when(modelMapper.map(any(Amizade.class), eq(AmizadeDTO.class))).thenReturn(new AmizadeDTO());
+        when(modelMapper.map(Mockito.<Amizade>any(), eq(AmizadeDTO.class))).thenReturn(new AmizadeDTO());
 
         AmizadeDTO dto = amizadeService.convertToDto(amizade);
 
@@ -119,7 +125,7 @@ class AmizadeServiceTest {
         when(usuarioService.buscarPorUuid(uuidA)).thenReturn(usuarioA);
         when(usuarioService.buscarPorUuid(uuidB)).thenReturn(usuarioB);
         when(amizadeRepository.save(isA(Amizade.class))).thenReturn(amizade);
-        when(modelMapper.map(any(Amizade.class), eq(AmizadeDTO.class))).thenReturn(new AmizadeDTO());
+        when(modelMapper.map(Mockito.<Amizade>any(), eq(AmizadeDTO.class))).thenReturn(new AmizadeDTO());
 
         AmizadeDTO dto = amizadeService.criarAmizade(uuidA, uuidB);
 
@@ -127,6 +133,6 @@ class AmizadeServiceTest {
         verify(usuarioService).buscarPorUuid(uuidA);
         verify(usuarioService).buscarPorUuid(uuidB);
         verify(amizadeRepository).save(isA(Amizade.class));
-        verify(modelMapper).map(any(Amizade.class), eq(AmizadeDTO.class));
+        verify(modelMapper).map(Mockito.<Amizade>any(), eq(AmizadeDTO.class));
     }
 }

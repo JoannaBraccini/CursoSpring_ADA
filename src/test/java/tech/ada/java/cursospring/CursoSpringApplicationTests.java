@@ -9,5 +9,4 @@ class CursoSpringApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
