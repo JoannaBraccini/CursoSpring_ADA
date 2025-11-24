@@ -1,7 +1,15 @@
-package tech.ada.java.cursospring.api.unit;
+package tech.ada.java.cursospring.api.amizade;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -20,10 +28,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import tech.ada.java.cursospring.api.amizade.Amizade;
-import tech.ada.java.cursospring.api.amizade.AmizadeDTO;
-import tech.ada.java.cursospring.api.amizade.AmizadeRepository;
-import tech.ada.java.cursospring.api.amizade.AmizadeService;
 import tech.ada.java.cursospring.api.exception.AmizadeInvalidaBusinessException;
 import tech.ada.java.cursospring.api.usuario.Usuario;
 import tech.ada.java.cursospring.api.usuario.UsuarioService;
