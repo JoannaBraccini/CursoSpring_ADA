@@ -130,18 +130,43 @@ Lá você pode visualizar e testar todos os endpoints disponíveis do projeto, i
 
 ### Executando testes automatizados com ou sem cobertura
 
-O script `run-tests.sh` permite executar os testes automatizados com ou sem cobertura de código. Por padrão, os testes são executados **sem cobertura**. Para ativar a cobertura de código, utilize a variável de ambiente `COVERAGE=true`.
+O runner `test-runner.sh` permite executar os testes automatizados com ou sem cobertura de código. Por padrão, os testes são executados **sem cobertura**. Para ativar a cobertura de código, utilize a variável de ambiente `COVERAGE=true`.
 
 - **Executar testes sem cobertura (padrão):**
 
 ```bash
-bash run-tests.sh
+bash scripts/tests/test-runner.sh
 ```
 
 - **Executar testes com cobertura:**
 
 ```bash
-COVERAGE=true bash run-tests.sh
+COVERAGE=true bash scripts/tests/test-runner.sh
 ```
 
 Ao ativar a cobertura, um relatório será gerado no diretório `target/site/jacoco/index.html`. Para visualizar o relatório, abra o arquivo HTML no navegador ou use uma extensão como "Live Server" no VS Code.
+
+### Perfis de Teste
+
+Por padrão, os testes de unidade do projeto usam H2 (banco em memória). Para facilitar o fluxo existem dois wrappers principais:
+
+- `scripts/tests/run-unit-tests.sh`: roda os testes unitários com o profile `h2` (rápido, isolado).
+- `scripts/tests/run-integration-tests.sh`: roda os testes de integração via Maven (profile `integration-test`) — usa Failsafe e, por padrão, Testcontainers irá inicializar um Postgres ephemeral.
+
+O runner principal `test-runner.sh` ainda existe como utilitário, mas os wrappers acima cobrem os usos mais comuns. Exemplos:
+
+- Executar testes unitários (H2) — recomendado para desenvolvimento local rápido:
+
+  ```bash
+  bash scripts/tests/run-unit-tests.sh
+  # executar um teste específico
+  bash scripts/tests/run-unit-tests.sh tech.ada.java.cursospring.api.amizade.AmizadeServiceTest
+  ```
+
+- Executar testes de integração (requires Docker):
+
+  ```bash
+  bash scripts/tests/run-integration-tests.sh
+  # ou diretamente com Maven
+  ./mvnw -Pintegration-test verify
+  ```
