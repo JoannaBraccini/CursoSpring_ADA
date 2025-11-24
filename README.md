@@ -4,7 +4,7 @@
 - **JAVA_HOME:** aponte `JAVA_HOME` para um JDK 21 (ex.: `C:\Program Files\Java\jdk-21...`). O `./mvnw` respeita `JAVA_HOME`.
 - **Compilar sem testes (rápido):** `./mvnw -DskipTests clean package`.
 - **Executar testes unitários:** `./mvnw test` (usa H2 em memória).
-- **Executar testes de integração:** `./mvnw -Pintegration-test verify` — requer o Postgres disponível (por Testcontainers ou `docker compose up -d`).
+- **Executar testes de integração:** `./mvnw -Pintegration-test verify` — requer o Postgres disponível (por `docker compose up -d`).
 - **Docker Compose (execução rápida):**
 
   ```bash
@@ -153,7 +153,7 @@ Use o wrapper do Maven para executar os testes; não é necessário usar scripts
 ./mvnw test
 ```
 
-- Testes de integração (Postgres/Testcontainers):
+- Testes de integração (Postgres):
 
 ```bash
 ./mvnw -Pintegration-test verify
